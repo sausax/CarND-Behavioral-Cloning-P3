@@ -111,7 +111,7 @@ from IPython.display import display
 # In[16]:
 
 # Location of the simulator data.
-DATA_FILE = '/Users/saurabh/Downloads/car_output/driving_log.csv'
+DATA_FILE = '/home/saurabh/Downloads/car_output/driving_log.csv'
 
 # Load the training data from the simulator.
 cols = ['center_image', 'left_image', 'right_image', 'steering_angle', 'throttle', 'break', 'speed']
