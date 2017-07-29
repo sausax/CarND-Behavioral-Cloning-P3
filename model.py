@@ -6,12 +6,12 @@ from sklearn.model_selection import train_test_split
 import keras
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten
-from keras.layers import Conv2D, MaxPooling2D
+from keras.layers import Conv2D, MaxPooling2D, Lambda
+from keras.optimizers import Adam
 from keras import backend as K
 from keras.callbacks import LearningRateScheduler
 
 from preprocessing import *
-from models import *
 
 log_files = ['/home/saurabh/Datasets/behaviour_cloning/driving_log.csv', \
 			'/home/saurabh/Datasets/behaviour_cloning_reverse/driving_log.csv',\
@@ -37,13 +37,46 @@ print("Shape of y_train: ", y_train.shape)
 #batch_size = 128
 batch_size = 128
 epochs = 30
-#input_shape = (80, 80, 1)
 input_shape = (80, 80, 3)
-#input_shape = (80, 320, 3)
 
-# Model with 3 convolutional layers followed by 2 fully 
-# connected layer
 
+## NVIDIA architecture
+## Added max pooling and dropout layer
+model = Sequential()
+model.add(Lambda(lambda x: x/255.0 - 0.5, input_shape=input_shape))
+model.add(Conv2D(3, kernel_size=(3, 3),
+                 activation='elu'))
+model.add(Conv2D(24, (3, 3), activation='elu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(Dropout(0.25))
+
+model.add(Conv2D(128, (3, 3), activation='elu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(Dropout(0.25))
+
+model.add(Conv2D(36, (3, 3), activation='elu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(Dropout(0.25))
+
+model.add(Conv2D(48, (3, 3), activation='elu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(Dropout(0.25))
+
+model.add(Conv2D(64, (3, 3), activation='elu'))
+model.add(Dropout(0.25))
+
+model.add(Flatten())
+model.add(Dense(1164, activation='elu'))
+model.add(Dropout(0.5))
+model.add(Dense(100, activation='elu'))
+model.add(Dropout(0.5))
+model.add(Dense(50, activation='elu'))
+model.add(Dropout(0.5))
+model.add(Dense(10, activation='elu'))
+model.add(Dropout(0.5))
+model.add(Dense(1, activation='tanh'))
+
+model.compile(loss='mean_squared_error', optimizer=Adam())
 
 ## Train Classifier
 
@@ -59,7 +92,5 @@ model.fit(X_train, y_train,
           validation_data=(X_valid, y_valid),
           callbacks=callbacks_list)
 
-#K.clear_session()
-
 # Save model
-model.save('trained_model.h5')
+model.save('model.h5')
