@@ -5,11 +5,6 @@ import pandas as pd
 
 from scipy.misc import imread, imresize
 
-def convert_to_gray(img):
-    img = np.dot(img[...,:3], [0.299, 0.587, 0.114])
-    return np.expand_dims(img, axis=2)
-
-
 def crop_img(img):
 	img = img[60:140, :]
 	return img
@@ -24,9 +19,9 @@ def flip_img(img):
 def preprocess(img):
 	img = crop_img(img)
 	img = resize_img(img)
-	#img = convert_to_gray(img)
 	return img
 
+# Read and preprocess image file
 def get_image_vector(img_file):
 	img_arr = imread(img_file)
 	img_arr = preprocess(img_arr)

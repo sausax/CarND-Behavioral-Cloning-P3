@@ -13,44 +13,42 @@ from keras.callbacks import LearningRateScheduler
 
 from preprocessing import *
 
+
+# Driving log files
 log_files = ['/home/saurabh/Datasets/behaviour_cloning/driving_log.csv', \
 			'/home/saurabh/Datasets/behaviour_cloning_reverse/driving_log.csv',\
 			'/home/saurabh/Datasets/behaviour_cloning_left/driving_log.csv',\
 			'/home/saurabh/Datasets/behaviour_cloning_center/driving_log.csv',\
 			'/home/saurabh/Datasets/behaviour_cloning_center_reverse/driving_log.csv',\
-			#'/home/saurabh/Datasets/behaviour_cloning_right/driving_log.csv',\
 			'/home/saurabh/Datasets/behaviour_cloning2/driving_log.csv'] 
-# Load dataset
 
+# Load dataset
 X_data, y_data = combine_multiple_datasets(log_files)
 X_data, y_data = randomly_remove_zero_angle_images(X_data, y_data, 0.25)
 
 X_data, y_data = add_flipped_images(X_data, y_data)
 
-# Train classifier
-
+# Split dataset into training and validation set
 X_train, X_valid, y_train, y_valid = train_test_split(X_data, y_data, test_size=0.20, random_state=42)
 
 print("Shape of X_train: ", X_train.shape)
 print("Shape of y_train: ", y_train.shape)
 
-#batch_size = 128
+
+## Model paramters
 batch_size = 128
 epochs = 30
 input_shape = (80, 80, 3)
 
 
-## NVIDIA architecture
-## Added max pooling and dropout layer
+## Neural Network architecture used for training
+## Added Max Pooling to reduce the number of paramters
+## Added Dropout layer to avoid overfitting
 model = Sequential()
 model.add(Lambda(lambda x: x/255.0 - 0.5, input_shape=input_shape))
 model.add(Conv2D(3, kernel_size=(3, 3),
                  activation='elu'))
 model.add(Conv2D(24, (3, 3), activation='elu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.25))
-
-model.add(Conv2D(128, (3, 3), activation='elu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 model.add(Dropout(0.25))
 
@@ -79,18 +77,11 @@ model.add(Dense(1, activation='tanh'))
 model.compile(loss='mean_squared_error', optimizer=Adam())
 
 ## Train Classifier
-
-model = simple_model8(input_shape)
-
-lrate = LearningRateScheduler(step_decay)
-callbacks_list = [lrate]
-
 model.fit(X_train, y_train,
           batch_size=batch_size,
           epochs=epochs,
           verbose=1,
-          validation_data=(X_valid, y_valid),
-          callbacks=callbacks_list)
+          validation_data=(X_valid, y_valid))
 
 # Save model
 model.save('model.h5')
