@@ -22,7 +22,7 @@ log_files = ['/home/saurabh/Datasets/behaviour_cloning/driving_log.csv', \
 			'/home/saurabh/Datasets/behaviour_cloning_center_reverse/driving_log.csv',\
 			'/home/saurabh/Datasets/behaviour_cloning2/driving_log.csv'] 
 
-# Load dataset
+# Load and preprocess dataset
 X_data, y_data = combine_multiple_datasets(log_files)
 X_data, y_data = randomly_remove_zero_angle_images(X_data, y_data, 0.25)
 
